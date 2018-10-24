@@ -40,6 +40,10 @@ class Threader(Thread):
             response = connection.run(rr.message)
 
             if response is None:
+                print("DNS server timeout")
+                continue
+            elif "{0:b}".format(int(response[4:8], 16))[12:] == "0010":
+                print("No Authoritative DNS server found")
                 continue
             elif "{0:b}".format(int(response[4:8], 16))[12:] == "0011":
                 print("No DNS entry")

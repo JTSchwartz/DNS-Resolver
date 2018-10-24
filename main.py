@@ -2,6 +2,7 @@
 # Jacob Schwartz (schwartzj1)
 from math import sqrt
 import subprocess
+import sys
 from threader import Threader
 import time
 from queue import Queue
@@ -20,21 +21,19 @@ def get_local_dns():
         return output[output.find("Address:  ") + 10:output.find("#")]
 
 
-def batch():
+def batch(count):
     start = time.time()
     ip_queue = Queue()
 
-    count = 0
     try:
         with open("dns-in.txt") as file:
             for line in file:
                 ip_queue.put(line)
-                count += 1
     except IOError:
         print("File does not exist")
         exit(1)
 
-    thread_count = int(sqrt(count))
+    thread_count = count
     thread_list = []
 
     for x in range(thread_count):
@@ -61,9 +60,19 @@ def interactive(args="www.google.com"):
 if __name__ == "__main__":
     local_dns = get_local_dns()
 
-    interactive()
+    if len(sys.argv) != 2:
+        print("Requires exactly one argument, either number of threads for batch, or ip/hostname for interactive")
 
-    # if len(sys.argv) > 1:
-    #     interactive(sys.argv[1:])
-    # else:
-    #     batch()
+    mode = False
+    n = 0
+    arg = sys.argv[1]
+
+    try:
+        n = int(arg)
+    except ValueError:
+        mode = True
+
+    if mode:
+        interactive(arg)
+    else:
+        batch(n)

@@ -32,7 +32,7 @@ class UDPSocket:
                 count += 1
                 self.run(message, count)
             else:
-                print("Local DNS server timeout")
+                return None
         except error:
             print("Socket Error: {}".format(error))
         finally:
