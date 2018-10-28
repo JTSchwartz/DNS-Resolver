@@ -20,7 +20,7 @@ class UDPSocket:
         except error:
             print("Socket Generation Error: {}".format(error))
 
-    def run(self, message, count=0):
+    def run(self, message, count=1):
         receive = None
         try:
             self.sock.settimeout(5)
@@ -28,17 +28,16 @@ class UDPSocket:
             receive, _ = self.sock.recvfrom(4096)
             receive = binascii.hexlify(receive).decode("utf-8")
         except timeout:
-            if count < 3:
+            if count <= 3:
                 count += 1
                 self.run(message, count)
             else:
-                return None
+                return None, count
         except error:
             print("Socket Error: {}".format(error))
         finally:
             self.close_socket()
-            return receive
+            return receive, count
 
     def close_socket(self):
         self.sock.close()
-        self.sock = None

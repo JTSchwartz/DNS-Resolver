@@ -10,7 +10,7 @@ class Parser:
 
     def a_first(self):
         ip = list()
-        index = self.msg.find("c0")
+        index = self.msg.find("c00c")
         opcode = self.msg[index + 7: index + 8]
         index += 22
         loc = index
@@ -46,9 +46,7 @@ class Parser:
 
             loc = self.msg.find("00010001")
             loc = self.msg[loc + 1:].find("00010001") + loc + 19
-            # print(loc)
             length = int(self.msg[loc:loc + 2], 16)
-            # print(length)
             loc += 2
 
             for x in range(loc, loc + (length * 2), 2):
@@ -66,17 +64,23 @@ class Parser:
 
     def ptr_first(self):
         address = list()
-        index = self.msg.find("c0") + 24
+        index = self.msg.find("c00c") + 24
+        try:
+            while int(self.msg[index: index + 2], 16) != 0:
+                length = int(self.msg[index: index + 2], 16)
+                index += 2
+                section = list()
 
-        while int(self.msg[index: index + 2], 16) != 0:
-            length = int(self.msg[index: index + 2], 16)
-            index += 2
-            section = list()
+                for x in range(index, index + (length * 2), 2):
+                    try:
+                        section.append(chr(int(self.msg[x:x + 2], 16)))
+                    except ValueError:
+                        section.append("")
 
-            for x in range(index, index + (length * 2), 2):
-                section.append(chr(int(self.msg[x:x + 2], 16)))
-
-            index += 2 * (len(section))
-            address.append("".join(section))
+                index += 2 * (len(section))
+                address.append("".join(section))
+        except ValueError:
+            index += 1
 
         return None, ".".join(address)
+

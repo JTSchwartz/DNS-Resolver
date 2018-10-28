@@ -1,6 +1,6 @@
 # main.py
 # Jacob Schwartz (schwartzj1)
-from math import sqrt
+
 import subprocess
 import sys
 from threader import Threader
@@ -28,10 +28,14 @@ def batch(count):
     try:
         with open("dns-in.txt") as file:
             for line in file:
-                ip_queue.put(line)
+                ip_queue.put(line[:line.find("\t")])
     except IOError:
         print("File does not exist")
         exit(1)
+
+    entries = ip_queue.qsize()
+    print("Starting batch mode with", count, "threads")
+    print("Reading input file... found", entries, "entries\n...")
 
     thread_count = count
     thread_list = []
@@ -45,6 +49,16 @@ def batch(count):
         thread.join()
 
     end = time.time()
+    print("Completed", entries, "queries")
+    print("\tSuccessful: {0:.2f}%".format((Threader.successful[0]/entries) * 100))
+    print("\tNo DNS {0:.2f}%".format((Threader.no_dns[0]/entries) * 100))
+    print("\tNo Auth DNS Server: {0:.2f}%".format((Threader.no_auth[0]/entries) * 100))
+    print("\tAverage Attempts: {0:.2f}".format(Threader.retx[0]/entries))
+    print("\tRuntime: {0:.2f} seconds".format(end - start))
+    print("Writing output file... finished with {} entries".format(len(Threader.full_response)))
+
+    output = open("dns-out.txt", "w")
+    output.write("\n".join(Threader.full_response))
 
 
 def interactive(args="www.google.com"):
@@ -54,7 +68,7 @@ def interactive(args="www.google.com"):
     thread.start()
     thread.join()
 
-    print("".join(Threader.result))
+    print("\n".join(Threader.full_response))
 
 
 if __name__ == "__main__":
