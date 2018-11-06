@@ -2,6 +2,7 @@
 # Jacob Schwartz (schwartzj1)
 
 from threading import *
+import time
 from udpsocket import *
 from resource_record import *
 from response_parser import Parser
@@ -9,12 +10,14 @@ from response_parser import Parser
 
 class Threader(Thread):
 
+    time_delays = list()
     thread_lock = Lock()
     successful = [0]
     no_dns = [0]
     no_auth = [0]
     dns_timeout = [0]
     retx = [0]
+    send_count = [0,0,0]
     full_response = list()
 
     def __init__(self, thread_id, shared_queue, dns_ip):
@@ -43,7 +46,8 @@ class Threader(Thread):
                     continue
 
             connection.create(self.dns_ip)
-            response, attempts = connection.run(rr.message)
+            response, attempts, delay = connection.run(rr.message)
+            self.update_counts(attempts)
 
             if response is None:
                 self.full_response.append("DNS server timeout\n")
@@ -67,11 +71,11 @@ class Threader(Thread):
                 self.thread_lock.release()
                 continue
 
+            self.time_delays.append(delay)
             parser = Parser(rr.rr_type, response)
             cname, answer = parser.a_first() if rr.rr_type is 'A' else parser.ptr_first()
             if cname is not None:
                 self.full_response.append("Answer:\n{} is aliased to {}\n{} is {}".format(host, cname, cname, answer))
-                self.full_response.append("{} is {}\n".format(cname, answer))
             else:
                 self.full_response.append("Answer:\n{} is {}\n".format(host, answer))
 
@@ -79,3 +83,6 @@ class Threader(Thread):
             self.successful[0] += 1
             self.retx[0] += attempts
             self.thread_lock.release()
+
+    def update_counts(self, num):
+        self.send_count[num - 1] += 1

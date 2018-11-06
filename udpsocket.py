@@ -1,8 +1,9 @@
 # udpsocket.py
 # Jacob Schwartz (schwartzj1)
 
-from socket import *
 import binascii
+import time
+from socket import *
 
 
 class UDPSocket:
@@ -22,22 +23,25 @@ class UDPSocket:
 
     def run(self, message, count=1):
         receive = None
+        start = end = 0
         try:
             self.sock.settimeout(5)
+            start = time.time()
             self.sock.sendto(binascii.unhexlify(message), self.dns)
             receive, _ = self.sock.recvfrom(4096)
+            end = time.time()
             receive = binascii.hexlify(receive).decode("utf-8")
         except timeout:
             if count <= 3:
                 count += 1
                 self.run(message, count)
             else:
-                return None, count
+                return None, count, 0
         except error:
             print("Socket Error: {}".format(error))
         finally:
             self.close_socket()
-            return receive, count
+            return receive, count, end - start
 
     def close_socket(self):
         self.sock.close()

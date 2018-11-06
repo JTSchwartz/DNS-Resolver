@@ -54,11 +54,18 @@ def batch(count):
     print("\tNo DNS {0:.2f}%".format((Threader.no_dns[0]/entries) * 100))
     print("\tNo Auth DNS Server: {0:.2f}%".format((Threader.no_auth[0]/entries) * 100))
     print("\tAverage Attempts: {0:.2f}".format(Threader.retx[0]/entries))
+    print("\tAverage Delays: {0:.2f}ms".format(sum(Threader.time_delays)/len(Threader.time_delays)*1000))
+    # print("\tOne Attempt: {}".format(Threader.send_count[0]))
+    # print("\tTwo Attempts: {}".format(Threader.send_count[1]))
+    # print("\tThree Attempts: {}".format(Threader.send_count[2]))
     print("\tRuntime: {0:.2f} seconds".format(end - start))
     print("Writing output file... finished with {} entries".format(len(Threader.full_response)))
+    # for x in Threader.time_delays:
+    #     print("{0:.2f}, ".format(x * 1000), end="")
+    result = "\n".join(Threader.full_response)
 
-    output = open("dns-out.txt", "w")
-    output.write("\n".join(Threader.full_response))
+    with open("dns-out.txt", "w", encoding="utf-8") as output:
+        output.write(result)
 
 
 def interactive(args="www.google.com"):
@@ -68,7 +75,8 @@ def interactive(args="www.google.com"):
     thread.start()
     thread.join()
 
-    print("\n".join(Threader.full_response))
+    result = "\n".join(Threader.full_response)
+    print(result)
 
 
 if __name__ == "__main__":

@@ -14,10 +14,10 @@
 *.xml
 *.pth
 *.egg
-venv/Scripts/activate
-venv/Lib/site-packages/dnspython-1.15.0.dist-info/WHEEL
-venv/Lib/site-packages/dnspython-1.15.0.dist-info/top_level.txt
-venv/Lib/site-packages/dnspython-1.15.0.dist-info/RECORD
-venv/Lib/site-packages/dnspython-1.15.0.dist-info/METADATA
-venv/Lib/site-packages/dnspython-1.15.0.dist-info/LICENSE.txt
-venv/Lib/site-packages/dnspython-1.15.0.dist-info/INSTALLER
+*.pdf
+*.R
+venv/
+build/
+dist/
+.idea/
+*.spec
